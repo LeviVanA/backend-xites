@@ -1,0 +1,36 @@
+{
+  "name": "app-back",
+  "version": "1.0.0",
+  "description": "back-end xites app",
+  "main": "index.js",
+  "author": "Levi Van Achter",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "config": "^3.3.9",
+    "koa": "^2.14.2"
+  },
+  "devDependencies": {
+    "env-cmd": "^10.1.0",
+    "nodemon": "^3.0.1"
+  },
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "nodemonConfig": {
+    "signal": "SIGTERM",
+    "ignore": [
+      "node_modules/*",
+      ".vscode/*"
+    ],
+    "delay": "80",
+    "watch": [
+      "config",
+      "src",
+      "index.js"
+    ],
+    "ext": "js,json",
+    "legacyWatch": true,
+    "exec": "node --inspect=0.0.0.0:9001 --trace-warnings index.js"
+  }
+}
