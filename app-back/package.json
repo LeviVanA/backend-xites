@@ -7,15 +7,18 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "@koa/router": "^12.0.1",
     "config": "^3.3.9",
-    "koa": "^2.14.2"
+    "koa": "^2.14.2",
+    "koa-bodyparser": "^4.4.1",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "env-cmd": "^10.1.0",
     "nodemon": "^3.0.1"
   },
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "env-cmd nodemon"
   },
   "nodemonConfig": {
     "signal": "SIGTERM",
@@ -31,6 +34,6 @@
     ],
     "ext": "js,json",
     "legacyWatch": true,
-    "exec": "node --inspect=0.0.0.0:9001 --trace-warnings index.js"
+    "exec": "node --inspect=0.0.0.0:9001 --trace-warnings src/index.js"
   }
 }
