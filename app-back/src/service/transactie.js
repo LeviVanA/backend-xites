@@ -1,3 +1,4 @@
+const { getLogger } = require('../core/logging');
 let { LOGGINGS } = require('../data/mock-data');
 
 const getAll = () => {
@@ -7,6 +8,10 @@ const getAll = () => {
 const create = ({ user, project, fase, notities, kilometers, factureerbaar,facturatiemethode }) => {
   if (typeof user === 'string') {
     user = { id: Math.floor(Math.random() * 100000), name: user };
+  }
+  else
+  {
+    getLogger().error('user is not a string');
   }
   const maxId = Math.max(...LOGGINGS.map((i) => i.id));
   const newLog = {
