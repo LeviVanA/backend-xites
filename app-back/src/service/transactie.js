@@ -1,8 +1,10 @@
 const { getLogger } = require('../core/logging');
 let { LOGGINGS } = require('../data/mock-data');
+const transactieRepository = require('../repository/transactie');
 
 const getAll = () => {
-  return { items: LOGGINGS, count: LOGGINGS.length };
+  const items = transactieRepository.findAll();
+  return {items};
 };
 
 const create = ({ user, project, fase, notities, kilometers, factureerbaar,facturatiemethode }) => {
