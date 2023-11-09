@@ -2,10 +2,8 @@ const Koa = require('koa');
 const config = require('config'); 
 const winston = require('winston');
 const bodyParser = require('koa-bodyparser');
-const Router = require('@koa/router'); 
-const transactieService = require('./service/transactie');
+const installRest = require('./rest');
 
-const router = new Router();
 
 
 const NODE_ENV = config.get('env');
@@ -24,13 +22,9 @@ const logger = winston.createLogger({
   ]
 });
 
+app.use(bodyParser());
 
-router.get('/api/transactions', async (ctx) => { 
-  ctx.body = transactieService.getAll();
-});
-
-app.use(router.routes()) 
-   .use(router.allowedMethods());
+installRest(app);
 
 
 app.listen(9000, () => {
