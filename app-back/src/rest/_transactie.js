@@ -2,7 +2,8 @@ const Router = require('@koa/router');
 const transactionService = require('../service/transactie');
 
 const getAllTransactions = async (ctx) => {
-  ctx.body = transactionService.getAll();
+  const limit = 100;
+  ctx.body = transactionService.getAll(limit);
 };
 
 const createTransaction = async (ctx) => {

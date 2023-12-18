@@ -83,7 +83,11 @@ function getKnex() {
 
 
 const tables = Object.freeze({
-  // TODO: add tables + migrations
+  user: 'users',
+  logging: 'loggings',
+  project: 'projects',
+  dienst: 'diensten',
+
 });
 
 module.exports = {

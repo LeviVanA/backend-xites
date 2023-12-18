@@ -2,9 +2,12 @@ const { getLogger } = require('../core/logging');
 let { LOGGINGS } = require('../data/mock-data');
 const transactieRepository = require('../repository/transactie');
 
-const getAll = () => {
-  const items = transactieRepository.findAll();
-  return {items};
+const getAll = async (limit) => {
+  const items = await transactieRepository.findAll().find().sort({ timestamp: -1 }).limit(limit);
+  return {
+    items,
+    count: items.length,
+  };
 };
 
 const create = ({ user, project, fase, notities, kilometers, factureerbaar,facturatiemethode }) => {

@@ -14,11 +14,15 @@ const formatTransaction = ({
   },
 });
 
+const SELECT_COLUMNS = [
+  `${tables.logging}.id`, 'date', `${tables.user}.naam`,`${tables.project}.naam`,
+];
+
 const findAll = () => {
-  //TODO: samenvoegen all tables
-  return getKnex()(tables) 
-    .select()
-    .orderBy('name', 'ASC')
+  
+  return getKnex()(tables.logging) 
+    .select(SELECT_COLUMNS)
+    .orderBy('date', 'ASC')
     .then(rows => rows.map(formatTransaction));
 };
 
