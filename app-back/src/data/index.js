@@ -3,6 +3,10 @@ const {
   getLogger
 } = require('../core/logging');
 
+const {
+  join
+} = require("path");
+
 const config = require('config');
 
 const NODE_ENV = config.get('env');
@@ -36,13 +40,15 @@ async function initializeData() {
       tableName: 'knex_meta',
       directory: join('src', 'data', 'migrations'),
     },
+    seeds: {
+      directory: join('src', 'data', 'seeds'),
+    },
   };
 
   knexInstance = knex(knexOptions);
 
 
   try {
-    await knexInstance.raw('SELECT 1+1 AS result');
     await knexInstance.raw('SELECT 1+1 AS result');
     await knexInstance.raw(`CREATE DATABASE IF NOT EXISTS ${DATABASE_NAME}`);
 
@@ -67,7 +73,18 @@ async function initializeData() {
 
     throw new Error('Migrations failed, check the logs');
   }
+
   logger.info('Succesfully connected to the database');
+  if (isDevelopment) {
+
+    try {
+      await knexInstance.seed.run();
+    } catch (error) {
+      logger.error('Error while seeding database', {
+        error,
+      });
+    }
+  }
   return knexInstance;
 
 }
