@@ -1,5 +1,10 @@
-const { tables, getKnex } = require('../data/index'); 
-const { getLogger } = require('../core/logging');
+const {
+  tables,
+  getKnex
+} = require('../data/index');
+const {
+  getLogger
+} = require('../core/logging');
 
 //TODO: samenvoegen all tables
 const formatTransaction = ({
@@ -15,37 +20,47 @@ const formatTransaction = ({
 });
 
 const SELECT_COLUMNS = [
-  `${tables.logging}.id`, 'date', `${tables.user}.naam`,`${tables.project}.naam`,
+  `${tables.logging}.id`, 'date', `${tables.user}.naam`, `${tables.project}.naam`,
 ];
 
 const findAll = () => {
-  
-  return getKnex()(tables.logging) 
+
+  return getKnex()(tables.logging)
     .select(SELECT_COLUMNS)
     .orderBy('date', 'ASC')
     .then(rows => rows.map(formatTransaction));
 };
 
 const create = async ({
-  user, project, fase, notities, kilometers, factureerbaar,facturatiemethode
+  date,
+  dienstId,
+  userId,
+  projectId,
+  beschrijving,
+  kilometers,
+  factureerbaar,
+  tijdsduur,
+  teControleren,
 }) => {
   const logger = getLogger();
   try {
     logger.info(id)
-    const [id] = await getKnex()(tables)//TODO
+    const [id] = await getKnex()(tables.logging)
       .insert({
-        user_id: user.id,
-        project,
-        fase,
-        notities,
-        kilometers,
+        date,
         factureerbaar,
-        facturatiemethode,
+        projectId,
+        dienstId,
+        teControleren,
+        tijdsduur,
+        kilometers,
+        beschrijving,
+        userId,
       });
-    console.log(tables)//TODO
+    console.log(tables.logging)
     return id;
   } catch (error) {
-    
+
     logger.error('Error in create', {
       error,
     });
