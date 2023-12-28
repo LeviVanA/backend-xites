@@ -6,29 +6,16 @@ const {
   getLogger
 } = require('../core/logging');
 
-//TODO: samenvoegen all tables
-const formatTransaction = ({
-  user_id,
-  user_name,
-  ...rest
-}) => ({
-  ...rest,
-  user: {
-    id: user_id,
-    name: user_name,
-  },
-});
-
 const SELECT_COLUMNS = [
-  `${tables.logging}.id`, 'date', `${tables.user}.naam`, `${tables.project}.naam`,
+  `${tables.logging}.id`, 'date', `${tables.user}.naam as naamUser`, `${tables.project}.naam`,
 ];
 
 const findAll = () => {
-
   return getKnex()(tables.logging)
     .select(SELECT_COLUMNS)
-    .orderBy('date', 'ASC')
-    .then(rows => rows.map(formatTransaction));
+    .join(tables.project, `${tables.logging}.projectId`, '=', `${tables.project}.id`)
+    .join(tables.user, `${tables.logging}.userId`, '=', `${tables.user}.id`)
+    .orderBy('date', 'ASC');
 };
 
 const create = async ({

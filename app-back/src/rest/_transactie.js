@@ -5,7 +5,8 @@ const validate = require('../core/validation');
 
 const getAllTransactions = async (ctx) => {
   const limit = 100;
-  ctx.body = transactionService.getAll(limit);
+  ctx.body = await transactionService.getAll(limit);
+  console.log(ctx.body);
 };
 getAllTransactions.validationScheme = null;
 

@@ -16,9 +16,10 @@ const {
 
 const getAll = async (limit) => {
   const items = await transactieRepository.findAll()//.limit(limit);
+  console.log(items)
   return {
     items,
-    count: items.length,
+    //count: items.length,
   };
 };
 

@@ -10,10 +10,6 @@ module.exports = {
             table.string('naam', 255)
                 .notNullable();
 
-            table.string('password_hash').notNullable();
-            
-            table.jsonb('roles').notNullable();
-
         });
 
     },

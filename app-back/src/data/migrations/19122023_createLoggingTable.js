@@ -27,14 +27,14 @@ module.exports = {
             table.string('tijdsduur', 255)
                 .notNullable();
 
-            table.integer('kilomters')
+            table.string('kilomters')
                 .notNullable();
 
             table.string('beschrijving', 255)
                 .notNullable();
 
             table.integer('userId').unsigned().notNullable();
-            table.foreign('userId', 'fk_Logging_User').references(`${tables.user}.id`);
+            table.foreign('userId', 'fk_Logging_User').references(`${tables.user}.id`).onDelete('CASCADE');
 
         });
 
