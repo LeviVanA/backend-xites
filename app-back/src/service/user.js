@@ -29,7 +29,8 @@ const generateJavaWebToken = async (user) => {
 const getByToken = async (token) => {
   debugLog(`Decoding token ${token}`);
   const decodedUser = jwt.decode(token);
-  const user = userRepository.findByid(decodedUser.id);
+  console.log(decodedUser);
+  const user = await userRepository.findByName("test1");
   const { salt, hash, ...rest } = user;
   return user;
 };
@@ -50,7 +51,11 @@ const getAllEmployees = async (companyID) => {
   }
 };
 
-const promote = async ({ token, name, role }) => {
+const promote = async ({
+  token,
+  name,
+  role
+}) => {
   debugLog(`Promoting user with ${name} to ${role}`);
   //const decodedAdmin = await getByToken(token);
   const user = await userRepository.findByName(name);
@@ -139,29 +144,29 @@ const verify = async ({
   } catch (error) {
     throw ServiceError.validationFailed(`Verification failed for token ${token}`);
   }
-    const user = await userRepository.findByName(decoded.name);
-    if (!user) {
-      throw ServiceError.notFound('user does not exist');
-    }
-    if (user.role !== decoded.permission) {
-      const jwtPackage = {
-        name: user.name,
-        permission: user.role,
-      };
+  const user = await userRepository.findByName(decoded.name);
+  if (!user) {
+    throw ServiceError.notFound('user does not exist');
+  }
+  if (user.role !== decoded.permission) {
+    const jwtPackage = {
+      name: user.name,
+      permission: user.role,
+    };
 
-      const newToken = jwt.sign(jwtPackage, process.env.JWT_SECRET, {
-        expiresIn: 36000,
-        issuer: process.env.AUTH_ISSUER,
-        audience: process.env.AUTH_AUDIENCE,
-      });
-      verification.token = newToken;
-      verification.validated = true;
-      return verification;
-    }
-    if (decoded) {
-      verification.validated = true;
-      return verification;
-    }
+    const newToken = jwt.sign(jwtPackage, process.env.JWT_SECRET, {
+      expiresIn: 36000,
+      issuer: process.env.AUTH_ISSUER,
+      audience: process.env.AUTH_AUDIENCE,
+    });
+    verification.token = newToken;
+    verification.validated = true;
+    return verification;
+  }
+  if (decoded) {
+    verification.validated = true;
+    return verification;
+  }
 
   return verification;
 };

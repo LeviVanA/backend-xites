@@ -7,7 +7,7 @@ const {
 } = require('../core/logging');
 
 const SELECT_COLUMNS = [
-  `${tables.logging}.id`, 'date', `${tables.user}.naam as naamUser`, `${tables.project}.naam`,
+  `${tables.logging}.id`, 'date', `${tables.user}.name as naamUser`, `${tables.project}.naam`,
 ];
 
 const findAll = () => {
@@ -30,7 +30,6 @@ const create = async (user,{
 }) => {
   const logger = getLogger();
   try {
-    logger.info(id)
     const [id] = await getKnex()(tables.logging)
       .insert({
         date,

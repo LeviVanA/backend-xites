@@ -13,7 +13,7 @@ const {
 const {
   getProjectIdByName
 } = require('../repository/project');
-const {getByToken} = require('./user');
+const userService = require('./user');
 
 const getAll = async (limit) => {
   const items = await transactieRepository.findAll()//.limit(limit);
@@ -37,7 +37,7 @@ const create = async (token,{
 }) => {
   const dienstId = await getDienstIdByName(dienst);
   const projectId = await getProjectIdByName(project);
-  const user = await getByToken(token);
+  const user = await userService.getByToken(token);
 
   const maxId = Math.max(...LOGGINGS.map((i) => i.id));
   const newLog = {

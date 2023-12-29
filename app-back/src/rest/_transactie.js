@@ -20,9 +20,8 @@ getAllTransactions.validationScheme = {
 };
 
 const createTransaction = async (ctx) => {
-
-
-  const newTransaction = transactionService.create({
+  console.log({...ctx.request.body})
+  const newTransaction = await transactionService.create(ctx.headers.authorization,{
     ...ctx.request.body,
   });
   ctx.body = newTransaction;

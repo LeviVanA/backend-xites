@@ -27,7 +27,7 @@ module.exports = {
             table.string('tijdsduur', 255)
                 .notNullable();
 
-            table.string('kilomters')
+            table.string('kilometers',255)
                 .notNullable();
 
             table.string('beschrijving', 255)
