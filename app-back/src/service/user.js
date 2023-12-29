@@ -1,7 +1,10 @@
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const {
   getLogger,
 } = require('../core/logging');
 const ServiceError = require('../core/serviceError');
+
 const userRepository = require('../repository/users');
 
 const debugLog = (message, meta = {}) => {
@@ -9,118 +12,192 @@ const debugLog = (message, meta = {}) => {
   this.logger.debug(message, meta);
 };
 
-/**
- * Register a new user
- *
- * @param {object} user - The user's data.
- * @param {string} user.name - The user's name.
- */
-const register = ({
-  naam,
-  auth0id,
-}) => {
-  debugLog('Creating a new user', {
-    naam,
-  });
-  return userRepository.create({
-    naam,
-    auth0id,
-  });
-};
-
-
-/**
- * Get all users.
- */
-const getAll = async () => {
-  debugLog('Fetching all users');
-  const data = await userRepository.findAll();
-  const totalCount = await userRepository.findCount();
-  return {
-    data,
-    count: totalCount,
+const generateJavaWebToken = async (user) => {
+  debugLog(`Generating JWT for ${user.name}`);
+  const jwtPackage = {
+    name: user.name,
+    permission: user.role,
   };
+  const token = jwt.sign(jwtPackage, process.env.JWT_SECRET, {
+    expiresIn: 36000,
+    issuer: process.env.AUTH_ISSUER,
+    audience: process.env.AUTH_AUDIENCE,
+  });
+  return token;
 };
 
-/**
- * Get the user with the given id.
- *
- * @param {string} id - Id of the user to get.
- *
- * @throws {ServiceError} One of:
- * - NOT_FOUND: No user with the given id could be found.
- */
+const getByToken = async (token) => {
+  debugLog(`Decoding token ${token}`);
+  const decodedUser = jwt.decode(token);
+  const user = userRepository.findByid(decodedUser.id);
+  const { salt, hash, ...rest } = user;
+  return user;
+};
+
 const getById = async (id) => {
-  debugLog(`Fetching user with id ${id}`);
+  debugLog(`Fetching user with id: ${id}`);
   const user = await userRepository.findById(id);
-
-  if (!user) {
-    throw ServiceError.notFound(`No user with id ${id} exists`, {
-      id,
-    });
-  }
-
   return user;
 };
 
-const getByAuth0Id = async (auth0id) => {
-  debugLog(`Fetching user with auth0id ${auth0id}`);
-  const user = await userRepository.findByAuth0Id(auth0id);
+const getAllEmployees = async (companyID) => {
+  debugLog(`Fetching all employees with companyID ${companyID}`);
+  try {
+    const employees = await userRepository.getAllEmployees(companyID);
+    return employees;
+  } catch (e) {
+    throw ServiceError.notFound(`${companyID} was not found`);
+  }
+};
+
+const promote = async ({ token, name, role }) => {
+  debugLog(`Promoting user with ${name} to ${role}`);
+  //const decodedAdmin = await getByToken(token);
+  const user = await userRepository.findByName(name);
+  console.log(user);
+  const promotedUserId = await userRepository.updateById(user.id, {
+    ...user,
+    role,
+  });
+};
+
+
+const register = async ({
+  name,
+  password,
+}) => {
+  debugLog(`Creating user with name ${name}`);
+  const salt = crypto.randomBytes(128).toString('base64');
+  const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha256').toString('base64');
+
+  const newUser = {
+    name,
+    salt,
+    hash,
+  };
+  try {
+    const user = await userRepository.create(newUser);
+
+    const jwtPackage = {
+      name: user.name,
+      permission: user.role,
+    };
+    return jwt.sign(jwtPackage, process.env.JWT_SECRET, {
+      expiresIn: 36000,
+      issuer: process.env.AUTH_ISSUER,
+      audience: process.env.AUTH_AUDIENCE,
+    });
+  } catch (error) {
+    if (error.message === 'DUPLICATE_ENTRY') {
+      throw ServiceError.duplicate('DUPLICATE ENTRY');
+    } else {
+      throw ServiceError.validationFailed(error.message);
+    }
+  }
+};
+
+const login = async ({
+  name,
+  password,
+}) => {
+  debugLog(`Verifying user with email ${name}`);
+  const verification = {
+    token: undefined,
+    validated: false,
+  };
+  const user = await userRepository.findByName(name);
 
   if (!user) {
-    throw ServiceError.notFound(`No user with id ${auth0id} exists`, {
-      auth0id,
-    });
+    throw ServiceError.notFound(`There is no user with name ${name}`);
+  }
+  const result = user.hash === crypto.pbkdf2Sync(password, user.salt, 10000, 64, 'sha256').toString('base64');
+  if (result) {
+    const token = await generateJavaWebToken(user);
+    verification.token = token;
+    verification.validated = true;
+  } else {
+    throw ServiceError.forbidden(`Verification failed for user with email ${email}`);
   }
 
-  return user;
+  return verification;
 };
-/**
- * Update an existing user.
- *
- * @param {string} id - Id of the user to update.
- * @param {object} user - User to save.
- * @param {string} [user.name] - Name of the user.
- *
- * @throws {ServiceError} One of:
- * - NOT_FOUND: No user with the given id could be found.
- */
-const updateById = (id, {
+
+const verify = async ({
+  token,
+}) => {
+  debugLog(`Verifying token ${token}`);
+  const verification = {
+    token: undefined,
+    validated: false,
+  };
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET, {
+      issuer: process.env.AUTH_ISSUER,
+      audience: process.env.AUTH_AUDIENCE,
+    });
+  } catch (error) {
+    throw ServiceError.validationFailed(`Verification failed for token ${token}`);
+  }
+    const user = await userRepository.findByName(decoded.name);
+    if (!user) {
+      throw ServiceError.notFound('user does not exist');
+    }
+    if (user.role !== decoded.permission) {
+      const jwtPackage = {
+        name: user.name,
+        permission: user.role,
+      };
+
+      const newToken = jwt.sign(jwtPackage, process.env.JWT_SECRET, {
+        expiresIn: 36000,
+        issuer: process.env.AUTH_ISSUER,
+        audience: process.env.AUTH_AUDIENCE,
+      });
+      verification.token = newToken;
+      verification.validated = true;
+      return verification;
+    }
+    if (decoded) {
+      verification.validated = true;
+      return verification;
+    }
+
+  return verification;
+};
+
+const update = async (token, {
   name,
 }) => {
-  debugLog(`Updating user with id ${id}`, {
-    name,
+  const decodedUser = await getByToken(token);
+  //const originalName = decodedUser.name;
+  //const user = await getUserByEmail(originalEmail);
+  debugLog(`updating user with id ${decodedUser.id}`);
+  const updatedUserId = await userRepository.updateById(decodedUser.id, {
+    name: (name || decodedUser.name),
   });
-  return userRepository.updateById(id, {
-    name,
-  });
-};
-
-
-/**
- * Delete an existing user.
- *
- * @param {string} id - Id of the user to delete.
- *
- * @throws {ServiceError} One of:
- * - NOT_FOUND: No user with the given id could be found.
- */
-const deleteById = async (id) => {
-  debugLog(`Deleting user with id ${id}`);
-  const deleted = await userRepository.deleteById(id);
-
-  if (!deleted) {
-    throw ServiceError.notFound(`No user with id ${id} exists`, {
-      id,
-    });
+  const updatedUser = await userRepository.findById(updatedUserId);
+  const verification = {
+    token: undefined,
+    validated: false,
+  };
+  if (updatedUser) {
+    const updatedToken = await generateJavaWebToken(updatedUser);
+    const formatedUpdatedUser = await userRepository.formatUser(updatedUser);
+    verification.token = updatedToken;
+    verification.updatedUser = formatedUpdatedUser;
+    verification.validated = true;
   }
+  return verification;
 };
 
 module.exports = {
-  register,
-  getAll,
+  getByToken,
   getById,
-  getByAuth0Id,
-  updateById,
-  deleteById,
+  register,
+  login,
+  verify,
+  update,
+  getAllEmployees,
+  promote,
 };

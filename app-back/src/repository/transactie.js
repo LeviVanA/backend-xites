@@ -18,10 +18,9 @@ const findAll = () => {
     .orderBy('date', 'ASC');
 };
 
-const create = async ({
+const create = async (user,{
   date,
   dienstId,
-  userId,
   projectId,
   beschrijving,
   kilometers,
@@ -42,7 +41,7 @@ const create = async ({
         tijdsduur,
         kilometers,
         beschrijving,
-        userId,
+        userId: user.id,
       });
     console.log(tables.logging)
     return id;

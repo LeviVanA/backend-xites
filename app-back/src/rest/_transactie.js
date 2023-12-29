@@ -1,44 +1,42 @@
 const Router = require('@koa/router');
 const transactionService = require('../service/transactie');
+const userService = require('../service/user');
 const Joi = require('joi');
 const validate = require('../core/validation');
+const {
+  addUserInfo,
+} = require('../core/auth');
 
 const getAllTransactions = async (ctx) => {
   const limit = 100;
   ctx.body = await transactionService.getAll(limit);
   console.log(ctx.body);
 };
-getAllTransactions.validationScheme = null;
+getAllTransactions.validationScheme = {
+  query: Joi.object({
+    limit: Joi.number().positive().max(1000).optional(),
+    offset: Joi.number().min(0).optional(),
+  }).and('limit', 'offset'),
+};
 
 const createTransaction = async (ctx) => {
-  let userId = 0;
-  try {
-    const user = await userService.getByAuth0Id(ctx.state.user.sub);
-    userId = user.id;
 
-  } catch (err) {
-    await addUserInfo(ctx);
-    userId = await userService.register({
-      auth0id: ctx.state.user.sub,
-      naam: ctx.state.user.name,
-    });
-  }
 
   const newTransaction = transactionService.create({
     ...ctx.request.body,
-    date: new Date(ctx.request.body.date),
-    userId,
   });
   ctx.body = newTransaction;
 };
 createTransaction.validationScheme = {
   body: {
-    amount: Joi.number().invalid(0),
-    date: Joi.date().iso().less('now'),
-    dienstId: Joi.number().integer().positive(),
-    projectId: Joi.number().integer().positive(),
-    kilometers: Joi.number().integer().positive(),
-    userId: Joi.number().integer().positive(),
+    dienst: Joi.string().required(),
+    project: Joi.string().required(),
+    beschrijving: Joi.string().required(),
+    kilometers: Joi.string().required(),
+    factureerbaar: Joi.boolean().required(),
+    tijdsduur: Joi.string().required(),
+    teControleren: Joi.boolean().required(),
+    date: Joi.date().less('now'),
   },
 };
 

@@ -1,88 +1,117 @@
 const Joi = require('joi');
 
+
 const JOI_OPTIONS = {
-    abortEarly: true,
-    allowUnknown: false,
-    context: true,
-    convert: true,
-    presence: 'required',
+  abortEarly: true,
+  allowUnknown: false,
+  context: true,
+  convert: true,
+  presence: 'required',
 };
 
-const validate = (schema) => {
-    if (!schema) {
-        schema = {
-            query: {},
-            body: {},
-            params: {},
-        };
+
+const cleanupJoiError = (error) => error.details.reduce((resultObj, {
+  message,
+  path,
+  type,
+}) => {
+  const joinedPath = path.join('.') || 'value';
+  if (!resultObj[joinedPath]) {
+    resultObj[joinedPath] = [];
+  }
+  resultObj[joinedPath].push({
+    type,
+    message,
+  });
+
+  return resultObj;
+}, {});
+
+const validation = (schema) => {
+  if (!schema) {
+    schema = {
+      query: {},
+      body: {},
+      params: {},
+    };
+  }
+
+
+  return (ctx, next) => {
+    const errors = {};
+    if (schema.query) {
+      if (!Joi.isSchema(schema.query)) {
+        schema.query = Joi.object(schema.query);
+      }
+
+      const {
+        error: queryErrors,
+        value: queryValue,
+      } = schema.query.validate(
+        ctx.query,
+        JOI_OPTIONS,
+      );
+
+      if (queryErrors) {
+        errors.query = cleanupJoiError(queryErrors);
+      } else {
+        ctx.query = queryValue;
+      }
     }
 
-    return (ctx, next) => {
-        const errors = {};
+    if (schema.body) {
+      if (!Joi.isSchema(schema.body)) {
+        schema.body = Joi.object(schema.body);
+      }
 
-        if (!Joi.isSchema(schema.params)) {
-            schema.params = Joi.object(schema.params || {});
-        }
+      const {
+        error: bodyErrors,
+        value: bodyValue,
+      } = schema.body.validate(
+        ctx.request.body,
+        JOI_OPTIONS,
+      );
 
-        const {
-            error: paramsError,
-            value: paramsValue
-        } = schema.params.validate(
-            ctx.params,
-            JOI_OPTIONS
-        );
+      if (bodyErrors) {
+        console.log()
+        console.log(bodyErrors)
+        console.log("le lul 2")
+        errors.body = cleanupJoiError(bodyErrors);
+      } else {
+        ctx.request.body = bodyValue;
+      }
+    }
 
-        if (paramsError) {
-            errors.params = cleanupJoiError(paramsError);
-        } else {
-            ctx.params = paramsValue;
-        }
+    if (schema.params) {
+      if (!Joi.isSchema(schema.params)) {
+        schema.params = Joi.object(schema.params);
+      }
 
-        if (Object.keys(errors).length) {
-            ctx.throw(400, 'Validation failed, check details for more information', {
-                code: 'VALIDATION_FAILED',
-                details: errors,
-            });
-        }
-        const cleanupJoiError = (
-                error
-            ) =>
-            error.details.reduce((resultObj, {
-                message,
-                path,
-                type
-            }) => {
-                const joinedPath = path.join('.') || 'value';
+      const {
+        error: paramsErrors,
+        value: paramsValue,
+      } = schema.params.validate(
+        ctx.params,
+        JOI_OPTIONS,
+      );
 
-                if (!resultObj[joinedPath]) {
-                    resultObj[joinedPath] = [];
-                }
-                resultObj[joinedPath].push({
-                    type,
-                    message,
-                });
+      if (paramsErrors) {
+        console.log("le lul 3")
+        errors.params = cleanupJoiError(paramsErrors);
+      } else {
+        ctx.params = paramsValue;
+      }
+    }
 
-                return resultObj;
-            }, {});
+    if (Object.keys(errors).length) {
+      console.log('de lul 1')
+      ctx.throw(400, 'Validation failed, check details for more information', {
+        code: 'VALIDATION_FAILED',
+        details: errors,
+      });
+    }
 
-        if (!Joi.isSchema(schema.body)) {
-            schema.body = Joi.object(schema.body || {});
-        }
-
-        const {
-            error: bodyError,
-            value: bodyValue
-        } = schema.body.validate(
-            ctx.request.body,
-            JOI_OPTIONS
-        );
-
-        if (bodyError) {
-            errors.body = cleanupJoiError(bodyError);
-        } else {
-            ctx.request.body = bodyValue;
-        }
-        return next();
-    };
+    return next();
+  };
 };
-module.exports = validate;
+module.exports = validation;

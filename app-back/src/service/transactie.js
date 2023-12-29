@@ -13,6 +13,7 @@ const {
 const {
   getProjectIdByName
 } = require('../repository/project');
+const {getByToken} = require('./user');
 
 const getAll = async (limit) => {
   const items = await transactieRepository.findAll()//.limit(limit);
@@ -23,26 +24,26 @@ const getAll = async (limit) => {
   };
 };
 
-const create = async ({
+const create = async (token,{
   dienst,
   project,
   beschrijving,
   kilometers,
   factureerbaar,
   tijdsduur,
+  teControleren,
   date,
-  userId,
 
 }) => {
   const dienstId = await getDienstIdByName(dienst);
   const projectId = await getProjectIdByName(project);
+  const user = await getByToken(token);
 
   const maxId = Math.max(...LOGGINGS.map((i) => i.id));
   const newLog = {
     id: maxId + 1,
     date: date.toISOString(),
     dienstId,
-    userId,
     projectId,
     beschrijving,
     kilometers,
@@ -52,10 +53,9 @@ const create = async ({
   };
 
   LOGGINGS.push(newLog);
-  const id = await transactieRepository.create({
+  const id = await transactieRepository.create(user,{
     date,
     dienstId,
-    userId,
     projectId,
     beschrijving,
     kilometers,
