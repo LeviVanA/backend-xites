@@ -16,15 +16,13 @@ const {
 const userService = require('./user');
 
 const getAll = async (limit) => {
-  const items = await transactieRepository.findAll()//.limit(limit);
+  const items = await transactieRepository.findAll() //.limit(limit);
   console.log(items)
-  return {
-    items,
-    //count: items.length,
-  };
+  return items
+
 };
 
-const create = async (token,{
+const create = async (token, {
   dienst,
   project,
   beschrijving,
@@ -53,7 +51,7 @@ const create = async (token,{
   };
 
   LOGGINGS.push(newLog);
-  const id = await transactieRepository.create(user,{
+  const id = await transactieRepository.create(user, {
     date,
     dienstId,
     projectId,

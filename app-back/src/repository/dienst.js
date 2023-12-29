@@ -3,6 +3,12 @@ const {
   getKnex
 } = require('../data/index');
 
+const getAllDiensten = async () => {
+  return getKnex()(tables.dienst)
+    .select()
+    .orderBy('id', 'ASC');
+};
+
 const getDienstIdByName = async (dienstName) => {
   const dienst = await getKnex()(tables.dienst)
     .select('id')
@@ -19,5 +25,6 @@ const getDienstIdByName = async (dienstName) => {
 
 
 module.exports = {
+  getAllDiensten,
   getDienstIdByName,
 };

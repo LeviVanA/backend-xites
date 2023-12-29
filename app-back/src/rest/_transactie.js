@@ -3,9 +3,6 @@ const transactionService = require('../service/transactie');
 const userService = require('../service/user');
 const Joi = require('joi');
 const validate = require('../core/validation');
-const {
-  addUserInfo,
-} = require('../core/auth');
 
 const getAllTransactions = async (ctx) => {
   const limit = 100;

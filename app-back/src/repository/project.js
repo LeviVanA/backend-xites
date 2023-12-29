@@ -3,6 +3,12 @@ const {
     getKnex
 } = require('../data/index');
 
+const getAllProjects = async () => {
+    return getKnex()(tables.project)
+        .select()
+        .orderBy('id', 'ASC');
+}
+
 const getProjectIdByName = async (projectName) => {
     const project = await getKnex()(tables.project)
         .select('id')
@@ -17,5 +23,6 @@ const getProjectIdByName = async (projectName) => {
 };
 
 module.exports = {
+    getAllProjects,
     getProjectIdByName,
 };
