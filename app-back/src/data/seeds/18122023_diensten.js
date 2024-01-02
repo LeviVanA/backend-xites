@@ -8,9 +8,9 @@ module.exports = {
 
     
     await knex(tables.dienst).insert([
-      { id: 1, soortDienst: 'Website'},
-      { id: 2, soortDienst: 'Hosting'},
-      { id: 3, soortDienst: 'Webshop'},
+      { id: 1, naam: 'Website'},
+      { id: 2, naam: 'Hosting'},
+      { id: 3, naam: 'Webshop'},
     ]); 
   },
 };

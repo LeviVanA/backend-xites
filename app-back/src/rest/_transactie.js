@@ -32,7 +32,7 @@ createTransaction.validationScheme = {
     factureerbaar: Joi.boolean().required(),
     tijdsduur: Joi.string().required(),
     teControleren: Joi.boolean().required(),
-    date: Joi.date().less('now'),
+    date: Joi.string().required(),
   },
 };
 

@@ -11,7 +11,7 @@ module.exports = {
 
         await knex(tables.logging).insert([{
                 id: 1,
-                date: new Date(2021, 4, 25),
+                date: "date",
                 factureerbaar: true,
                 projectId: 1,
                 dienstId: 1,
@@ -24,7 +24,7 @@ module.exports = {
             },
             {
                 id: 2,
-                date: new Date(2021, 4, 27),
+                date: "date",
                 factureerbaar: true,
                 projectId: 3,
                 dienstId: 3,
@@ -36,7 +36,7 @@ module.exports = {
             },
             {
                 id: 3,
-                date: new Date(2021, 4, 29),
+                date: "date",
                 factureerbaar: true,
                 projectId: 1,
                 dienstId: 2,

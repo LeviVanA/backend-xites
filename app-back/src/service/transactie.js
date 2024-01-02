@@ -17,8 +17,8 @@ const userService = require('./user');
 
 const getAll = async (limit) => {
   const items = await transactieRepository.findAll() //.limit(limit);
-  console.log(items)
-  return items
+  //console.log(items)
+  return {items: items,}
 
 };
 
@@ -40,7 +40,7 @@ const create = async (token, {
   const maxId = Math.max(...LOGGINGS.map((i) => i.id));
   const newLog = {
     id: maxId + 1,
-    date: date.toISOString(),
+    date: date,
     dienstId,
     projectId,
     beschrijving,

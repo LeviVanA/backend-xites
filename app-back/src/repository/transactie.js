@@ -7,7 +7,7 @@ const {
 } = require('../core/logging');
 
 const SELECT_COLUMNS = [
-  `${tables.logging}.id`, 'date', `${tables.user}.name as naamUser`, `${tables.project}.naam`,
+  `${tables.logging}.id`, 'date', `${tables.user}.name as user`, `${tables.project}.naam as project`,
 ];
 
 const findAll = () => {

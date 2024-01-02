@@ -12,7 +12,7 @@ const getAllDiensten = async () => {
 const getDienstIdByName = async (dienstName) => {
   const dienst = await getKnex()(tables.dienst)
     .select('id')
-    .where('soortDienst', dienstName)
+    .where('naam', dienstName)
     .first();
 
   if (!dienst) {

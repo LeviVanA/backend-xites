@@ -7,7 +7,7 @@ module.exports = {
         await knex.schema.createTable(tables.logging, (table) => {
             table.increments('id').unique();
 
-            table.dateTime('date')
+            table.string('date')
                 .notNullable();
 
             table.boolean('factureerbaar')

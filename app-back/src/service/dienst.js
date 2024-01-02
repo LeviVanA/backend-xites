@@ -15,8 +15,7 @@ const {
   const getAll = async () => {
     const items = await getAllDiensten();
     debugLog(`All diensten ${items}`);
-    return 
-      items
+    return {items: items,}
   };
   module.exports = {
     getAll

@@ -7,7 +7,7 @@ module.exports = {
         await knex.schema.createTable(tables.dienst, (table) => {
             table.increments('id').unique();
 
-            table.string('soortDienst', 255)
+            table.string('naam', 255)
                 .notNullable();
 
         });

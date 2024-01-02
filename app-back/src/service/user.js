@@ -30,8 +30,12 @@ const getByToken = async (token) => {
   debugLog(`Decoding token ${token}`);
   const decodedUser = jwt.decode(token);
   console.log(decodedUser);
-  const user = await userRepository.findByName("test1");
-  const { salt, hash, ...rest } = user;
+  const user = await userRepository.findByName(decodedUser.name);
+  const {
+    salt,
+    hash,
+    ...rest
+  } = user;
   return user;
 };
 
@@ -87,11 +91,13 @@ const register = async ({
       name: user.name,
       permission: user.role,
     };
-    return jwt.sign(jwtPackage, process.env.JWT_SECRET, {
-      expiresIn: 36000,
-      issuer: process.env.AUTH_ISSUER,
-      audience: process.env.AUTH_AUDIENCE,
-    });
+    return {
+      bearer: jwt.sign(jwtPackage, process.env.JWT_SECRET, {
+        expiresIn: 36000,
+        issuer: process.env.AUTH_ISSUER,
+        audience: process.env.AUTH_AUDIENCE,
+      })
+    };
   } catch (error) {
     if (error.message === 'DUPLICATE_ENTRY') {
       throw ServiceError.duplicate('DUPLICATE ENTRY');

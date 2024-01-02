@@ -15,7 +15,7 @@ const debugLog = (message, meta = {}) => {
 const getAll = async () => {
   const items = await getAllProjects();
   debugLog(`All diensten ${items}`);
-  return items
+  return {items: items}
 };
 module.exports = {
   getAll
