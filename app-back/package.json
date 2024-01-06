@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@koa/cors": "^4.0.0",
+    "@koa/cors": "^5.0.0",
     "@koa/router": "^12.0.1",
     "argon2": "^0.31.2",
     "axios": "^1.6.3",
@@ -22,7 +22,7 @@
     "koa-helmet": "^7.0.2",
     "koa-jwt": "^4.0.4",
     "mysql2": "^3.6.3",
-    "node-emoji": "1.11.0",
+    "node-emoji": "^2.1.3",
     "serialize-error": "8.1.0",
     "uuid": "^9.0.1",
     "winston": "^3.11.0"

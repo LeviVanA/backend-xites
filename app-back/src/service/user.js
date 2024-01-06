@@ -1,11 +1,16 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+
 const {
   getLogger,
 } = require('../core/logging');
 const ServiceError = require('../core/serviceError');
 
 const userRepository = require('../repository/users');
+
+const config = require('config');
+
+const AUTH_SECRET = config.get('auth.clientSecret');
 
 const debugLog = (message, meta = {}) => {
   if (!this.logger) this.logger = getLogger();
@@ -18,7 +23,7 @@ const generateJavaWebToken = async (user) => {
     name: user.name,
     permission: user.role,
   };
-  const token = jwt.sign(jwtPackage, process.env.JWT_SECRET, {
+  const token = jwt.sign(jwtPackage, AUTH_SECRET, {
     expiresIn: 36000,
     issuer: process.env.AUTH_ISSUER,
     audience: process.env.AUTH_AUDIENCE,
@@ -78,7 +83,8 @@ const register = async ({
   debugLog(`Creating user with name ${name}`);
   const salt = crypto.randomBytes(128).toString('base64');
   const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha256').toString('base64');
-
+console.log(hash)
+console.log(salt)
   const newUser = {
     name,
     salt,
@@ -91,8 +97,10 @@ const register = async ({
       name: user.name,
       permission: user.role,
     };
+    console.log(process.env.AUTH_ISSUER)
+    console.log(process.env.AUTH_AUDIENCE)
     return {
-      bearer: jwt.sign(jwtPackage, process.env.JWT_SECRET, {
+      bearer: jwt.sign(jwtPackage, AUTH_SECRET, {
         expiresIn: 36000,
         issuer: process.env.AUTH_ISSUER,
         audience: process.env.AUTH_AUDIENCE,
@@ -143,7 +151,7 @@ const verify = async ({
   };
   let decoded;
   try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET, {
+    decoded = jwt.verify(token, AUTH_SECRET, {
       issuer: process.env.AUTH_ISSUER,
       audience: process.env.AUTH_AUDIENCE,
     });
